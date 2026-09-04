@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>100 Days — Memory System</title>
+<style>
+:root{
+  --bg:#070910;
+  --panel:#0c1019;
+  --line:#273242;
+  --text:#dce7f3;
+  --muted:#7f8d9d;
+  --cyan:#8ddcff;
+  --green:#8df0b0;
+  --gold:#ead38f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}
+body{
+  font-family:"Courier New",Consolas,monospace;
+  overflow:hidden;
+}
+.screen{min-height:100vh;display:none;position:relative;overflow:hidden}
+.screen.active{display:flex}
+
+#intro{
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 50% 42%,#152131 0,#0a0d15 42%,#05070c 80%);
+}
+.scanlines{
+  position:absolute;inset:0;pointer-events:none;opacity:.09;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,#bde8ff 4px);
+  mix-blend-mode:screen;
+}
+.vignette{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle,transparent 35%,#000b 100%);
+}
+.system-shell{
+  width:min(760px,90vw);
+  z-index:2;
+  border:1px solid #405064;
+  background:#080c13e8;
+  box-shadow:0 0 60px #000, inset 0 0 35px #83d9ff08;
+  padding:clamp(22px,5vw,48px);
+  position:relative;
+}
+.system-shell:before{
+  content:"";
+  position:absolute;left:0;top:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  animation:bootline 2.2s ease-in-out infinite;
+}
+@keyframes bootline{
+  0%,100%{opacity:.25;transform:scaleX(.3)}
+  50%{opacity:1;transform:scaleX(1)}
+}
+.system-header{
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--line);padding-bottom:13px;margin-bottom:25px;
+  font-size:11px;color:var(--muted);letter-spacing:.08em;
+}
+.status-dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 12px var(--green);
+  margin-right:7px;animation:pulse 1s infinite;
+}
+@keyframes pulse{50%{opacity:.35;box-shadow:0 0 3px var(--green)}}
+
+.terminal{
+  min-height:330px;
+  font-size:clamp(12px,2vw,15px);
+  line-height:1.9;
+  color:#b9c7d7;
+}
+.boot-title{
+  color:var(--cyan);
+  font-weight:bold;
+  letter-spacing:.08em;
+  margin-bottom:22px;
+  text-shadow:0 0 12px #8ddcff66;
+}
+.cursor{
+  display:inline-block;width:9px;height:1.1em;
+  vertical-align:-2px;background:var(--cyan);
+  animation:blink .75s steps(1) infinite;
+}
+@keyframes blink{50%{opacity:0}}
+.line{opacity:0;white-space:pre-wrap}
+.line.show{opacity:1}
+.success{color:var(--green)}
+.highlight{color:white;text-shadow:0 0 18px #fff5}
+.achieved{
+  margin-top:20px;padding:17px 0;border-top:1px solid #344252;border-bottom:1px solid #344252;
+  font-size:clamp(17px,3vw,26px);letter-spacing:.08em;
+  color:var(--gold);text-shadow:0 0 18px #ead38f55;
+  opacity:0;transform:translateY(8px);
+}
+.achieved.show{animation:achieve .9s forwards}
+@keyframes achieve{
+  to{opacity:1;transform:none}
+}
+.progress{
+  margin-top:28px;height:3px;background:#1b2430;overflow:hidden;opacity:0;
+}
+.progress.show{opacity:1}
+.progress i{display:block;width:0;height:100%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);animation:progress 1.8s linear forwards}
+@keyframes progress{to{width:100%}}
+
+.enter{
+  margin-top:27px;background:transparent;border:1px solid #546579;color:#cfe6f5;
+  padding:12px 20px;font:inherit;font-size:12px;letter-spacing:.08em;
+  cursor:pointer;opacity:0;pointer-events:none;transition:.25s;
+}
+.enter.ready{opacity:1;pointer-events:auto}
+.enter:hover{background:#8ddcff12;border-color:var(--cyan);box-shadow:0 0 20px #8ddcff16}
+.reduced{color:var(--muted);font-size:10px;margin-top:15px}
+
+#memories{
+  padding:55px 22px 80px;align-items:center;justify-content:center;
+  background:
+    radial-gradient(circle at 50% 10%,#142332,#080b12 58%),
+    #070910;
+  font-family:"Courier New",Consolas,monospace;
+}
+.memory-inner{width:min(1100px,100%);z-index:2}
+.section-head{text-align:center;margin-bottom:35px}
+.section-head .kicker{margin-bottom:10px}
+.section-head h2{font-size:clamp(2rem,5vw,4rem);font-weight:400;margin:0}
+.section-head p{color:#bdb5c8}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.memory{background:#f8f1e8;padding:9px 9px 18px;color:#2d2735;box-shadow:0 15px 35px #0008;transform:rotate(var(--r));opacity:0;animation:rise .8s forwards;animation-delay:var(--d)}
+.memory .video{aspect-ratio:16/10;background:linear-gradient(135deg,#332846,#171323);display:grid;place-items:center;position:relative;overflow:hidden}
+.play{width:55px;height:55px;border-radius:50%;display:grid;place-items:center;border:1px solid #fff8;color:white}
+.memory small{display:block;margin-top:11px;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase}
+.memory strong{display:block;margin-top:5px;font-weight:400;font-size:1.05rem}
+@keyframes rise{from{opacity:0;transform:translateY(80px) rotate(var(--r)) scale(.92)}to{opacity:1;transform:rotate(var(--r)) scale(1)}}
+.continue{display:block;margin:48px auto 0;padding:13px 26px;border:1px solid #ffffff55;background:#ffffff08;color:white;border-radius:30px;cursor:pointer;letter-spacing:.08em}
+@media(max-width:700px){
+ .gallery{grid-template-columns:repeat(2,1fr);gap:12px}
+ .memory:nth-child(3){grid-column:1/-1;width:70%;justify-self:center}
+}
+@media(max-width:480px){.gallery{grid-template-columns:1fr}.memory:nth-child(3){width:100%}}
+
+.archive-status{
+  text-align:center;margin:30px auto 0;color:#738394;font-size:11px;
+  letter-spacing:.06em
+}
+.archive-status span{color:#8df0b0}
+.memory{background:#0b1119!important;color:#cbd8e6!important;border:1px solid #334252;
+  padding:8px 8px 16px;box-shadow:0 12px 35px #000b}
+.memory .video{background:linear-gradient(135deg,#101d2b,#070b11);border:1px solid #263442}
+.memory small{color:#7eafc9}
+.memory strong{font-family:"Courier New",Consolas,monospace}
+.continue{font-family:"Courier New",Consolas,monospace;border-radius:2px;background:#0b1119;color:#bfe6f7}
+#letter{
+  align-items:center;justify-content:center;padding:30px 18px;
+  background:radial-gradient(circle at 50% 35%,#142332,#05070c 75%);
+  font-family:"Courier New",Consolas,monospace;
+}
+.final-system{
+  width:min(760px,92vw);z-index:2;border:1px solid #405064;background:#080c13ee;
+  box-shadow:0 0 60px #000,inset 0 0 35px #83d9ff08;padding:clamp(22px,5vw,48px);
+}
+.final-header{
+  display:flex;justify-content:space-between;gap:15px;align-items:center;
+  border-bottom:1px solid #273242;padding-bottom:13px;margin-bottom:25px;
+  font-size:10px;color:#7f8d9d;letter-spacing:.08em
+}
+.final-log{line-height:1.9;font-size:12px;color:#7f8d9d;margin-bottom:24px}
+.terminal-small.success{color:#8df0b0}
+.system-letter{
+  border:1px solid #344252;background:#0b1018;padding:clamp(25px,6vw,48px);
+  position:relative;box-shadow:inset 0 0 35px #0008
+}
+.system-letter:before{
+  content:"";position:absolute;inset:9px;border:1px solid #1e2a37;pointer-events:none
+}
+.letter-label{color:#8ddcff;font-size:10px;letter-spacing:.12em;margin-bottom:28px}
+.system-letter h2{font-weight:400;color:#e4edf6;font-size:clamp(1.6rem,4vw,2.5rem);margin:0 0 25px}
+.system-letter p{font-size:13px;line-height:1.95;color:#bdcad7;margin:0 0 16px}
+.system-letter strong{color:#e6f5ff}
+.system-letter em{color:#8ddcff}
+.signature{margin-top:32px;text-align:right;color:#8ddcff;font-size:12px}
+.system-letter .final{text-align:center;margin-top:30px;color:#ead38f;font-size:10px;letter-spacing:.15em}
+.replay{
+  display:block;margin:25px auto 0;background:transparent;border:1px solid #405064;
+  color:#b9c7d7;padding:11px 18px;border-radius:2px;cursor:pointer;font:inherit;font-size:11px
+}
+
+</style>
+
+<style id="final-message-scroll-fix">
+/* ===== FINAL MESSAGE SCROLL FIX ===== */
+
+/* Allow the document itself to grow and scroll vertically. */
+html, body {
+  min-height: 100%;
+  height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+/* Any full-screen app/root wrapper must not clip later content. */
+body,
+#app,
+.app,
+.main,
+main,
+.page,
+.pages,
+.screen,
+.section,
+.scene,
+.container {
+  max-height: none !important;
+}
+
+/* Final section should behave like a normal long page, not a clipped viewport panel. */
+#final,
+#final-message,
+.final,
+.final-message,
+.finalMessage,
+[data-section="final"],
+[data-page="final"] {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  max-height: none !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+  padding-bottom: 72px !important;
+}
+
+/* Let common inner wrappers expand with the letter. */
+#final .content,
+#final-message .content,
+.final .content,
+.final-message .content,
+.finalMessage .content,
+#final .panel,
+#final-message .panel,
+.final .panel,
+.final-message .panel,
+#final .terminal,
+#final-message .terminal,
+.final .terminal,
+.final-message .terminal,
+#final .letter,
+#final-message .letter,
+.final .letter,
+.final-message .letter,
+.letter-panel,
+.message-panel,
+.final-panel {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+
+/* Prevent the personal letter text from being visually cut off. */
+#final p,
+#final-message p,
+.final p,
+.final-message p,
+#final .letter,
+#final-message .letter,
+.final .letter,
+.final-message .letter,
+.personal-message,
+.message-body,
+.letter-body {
+  overflow: visible !important;
+  max-height: none !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Replay/Reboot control must remain inside the content flow. */
+#final button,
+#final-message button,
+.final button,
+.final-message button,
+#final a.button,
+#final-message a.button,
+.final a.button,
+.final-message a.button,
+.replay-button,
+.reboot-button,
+#replay,
+#reboot {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  top: auto !important;
+  transform: none !important;
+  margin-top: 28px !important;
+  margin-bottom: 24px !important;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+}
+
+/* Give the user comfortable breathing room at the very bottom. */
+body::after {
+  content: "";
+  display: block;
+  height: 24px;
+}
+
+/* Mobile safety */
+@media (max-width: 700px) {
+  #final,
+  #final-message,
+  .final,
+  .final-message,
+  .finalMessage,
+  [data-section="final"],
+  [data-page="final"] {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    padding-bottom: 56px !important;
+  }
+}
+</style>
+
+</head>
+<body>
+
+<section id="intro" class="screen active">
+  <div class="scanlines"></div><div class="vignette"></div>
+  <div class="system-shell">
+    <div class="system-header">
+      <span>MEMORY ARCHIVE / CORE-100</span>
+      <span><i class="status-dot"></i>SYSTEM ONLINE</span>
+    </div>
+
+    <div class="terminal">
+      <div class="boot-title">[ SYSTEM INITIALIZING... ] <span class="cursor"></span></div>
+
+      <div id="l1" class="line">Establishing connection...</div>
+      <div id="l2" class="line">Checking memory logs...</div>
+      <br>
+      <div id="l3" class="line success">`Viewer detected.`</div>
+      <div id="l4" class="line success">`Connection status: ACTIVE`</div>
+      <div id="l5" class="line">`Days recorded: 099`</div>
+      <div id="l6" class="line">...</div>
+
+      <div id="achieved" class="achieved">`DAY 100 ACHIEVED.`</div>
+
+      <div id="progress" class="progress"><i></i></div>
+      <button id="enter" class="enter" onclick="showMemories()">[ ACCESS MEMORY ARCHIVE ]</button>
+      <div id="hint" class="reduced"></div>
+    </div>
+  </div>
+</section>
+
+<section id="memories" class="screen">
+  <div class="memory-inner">
+    <div class="section-head">
+      <div class="kicker">MEMORY ARCHIVE / MODULE 01</div>
+      <h2>Memory Archive</h2>
+      <p>&gt; Six memory fragments recovered from the last 100 days.</p>
+    </div>
+    <div class="gallery">
+      <article class="memory" style="--r:-2deg;--d:.1s"><div class="video"><div class="play">▶</div></div><small>ARCHIVE 001</small><strong>First connection</strong></article>
+      <article class="memory" style="--r:1.5deg;--d:.3s"><div class="video"><div class="play">▶</div></div><small>ARCHIVE 002</small><strong>A moment worth keeping</strong></article>
+      <article class="memory" style="--r:-1deg;--d:.5s"><div class="video"><div class="play">▶</div></div><small>ARCHIVE 003</small><strong>Memory fragment detected</strong></article>
+      <article class="memory" style="--r:2deg;--d:.7s"><div class="video"><div class="play">▶</div></div><small>ARCHIVE 004</small><strong>Another day, another memory</strong></article>
+      <article class="memory" style="--r:-1.5deg;--d:.9s"><div class="video"><div class="play">▶</div></div><small>ARCHIVE 005</small><strong>Connection still active</strong></article>
+      <article class="memory" style="--r:1deg;--d:1.1s"><div class="video"><div class="play">▶</div></div><small>ARCHIVE 006</small><strong>Milestone: DAY 100</strong></article>
+    </div>
+    <div class="archive-status">&gt; ARCHIVE INTEGRITY: <span>100%</span> &nbsp; | &nbsp; CONNECTION: <span>ACTIVE</span></div>
+    <button class="continue" onclick="showLetter()">[ OPEN FINAL MESSAGE ]</button>
+  </div>
+</section>
+
+<section id="letter" class="screen">
+  <div class="final-system">
+    <div class="final-header">
+      <span>MEMORY ARCHIVE / FINAL MESSAGE</span>
+      <span><i class="status-dot"></i>DECRYPTED</span>
+    </div>
+
+    <div class="final-log">
+      <div class="terminal-small">&gt; All memory fragments recovered.</div>
+      <div class="terminal-small">&gt; Preparing final message...</div>
+      <div class="terminal-small success">&gt; Sender identified.</div>
+      <div class="terminal-small success">&gt; Message integrity: 100%</div>
+    </div>
+
+    <article class="system-letter">
+      <div class="letter-label">PERSONAL MESSAGE // DAY 100</div>
+      <div class="date">Tháng 9, 2026</div>
+      <h2>Chào ký chủ Habi,</h2>
+      <p>Lại là tôi - hệ thống sô 098 - điểm danh mỗi khi Habi stream đây. Có điều hôm nay có chút đặc biệt hơn.</p>
+      <p>100 ngày có thể không phải là một khoảng thời gian quá dài, nhưng trong từng ngày đó lại có rất nhiều khoảnh khắc nhỏ mà tôi muốn lưu giữ và trân trọng.</p>
+      <p>Dù tôi có thể chỉ là 1 hệ thống vô tri nhưng cảm ơn vì những buổi stream, những câu chuyện, những tiếng cười và cả những khoảnh khắc rất bình thường nhưng somehow lại khiến một ngày của tôi đỡ tẻ nhạt.</p>
+      <p>Nhân ngày hôm nay, tôi đã mượn 1 chút sức mạnh từ thế giới của tôi để can thiệp và làm chiếc website nhỏ này không phải vì 100 ngày là một con số quá lớn, mà vì mình muốn nói rằng: <em>Tôi thật sự rất vui vì có thể gặp Habi và mọi người trong công ty chúng ta.</em></p>
+      <p>Chúc cho những ngày tiếp theo cũng sẽ có thật nhiều niềm vui. Và nếu có thể, tôi sẽ cố gắng và tiếp tục đồng hành thêm thật nhiều ngày nữa. Có thể là 200, 300, 400, 1000 ngày... ai mà biết được chứ ^^</p>
+      <div class="signature">&gt; From, Hệ thống số 098</div>
+      <div class="final">CONNECTION REMAINS ACTIVE ♡</div>
+    </article>
+
+    <button class="replay" onclick="location.reload()">[ REBOOT MEMORY SYSTEM ]</button>
+  </div>
+</section>
+
+<script>
+
+let audioCtx = null;
+function initAudio(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(audioCtx.state === "suspended") audioCtx.resume();
+}
+function tone(freq, duration=.08, type="sine", volume=.025, when=0){
+  if(!audioCtx) return;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type; o.frequency.value=freq;
+  const t=audioCtx.currentTime+when;
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(volume,t+.008);
+  g.gain.exponentialRampToValueAtTime(.0001,t+duration);
+  o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t+duration+.02);
+}
+function bootSound(){
+  initAudio();
+  tone(180,.09,"square",.018);
+  tone(360,.07,"square",.012,.12);
+  tone(720,.06,"sine",.012,.25);
+}
+function successSound(){
+  initAudio();
+  tone(440,.12,"sine",.025);
+  tone(660,.15,"sine",.025,.11);
+  tone(880,.28,"sine",.03,.23);
+}
+function clickSound(){
+  initAudio(); tone(280,.045,"square",.018);
+}
+function archiveHum(){
+  if(!audioCtx) return;
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type="sine";o.frequency.value=55;g.gain.value=.006;
+  o.connect(g);g.connect(audioCtx.destination);o.start();
+  window._hum=o;
+}
+function stopHum(){
+  if(window._hum){try{window._hum.stop()}catch(e){} window._hum=null}
+}
+
+document.addEventListener("pointerdown", ()=>{ initAudio(); bootSound(); archiveHum(); }, {once:true});
+const lines = [
+  ["l1", 650],
+  ["l2", 850],
+  ["l3", 750],
+  ["l4", 550],
+  ["l5", 700],
+  ["l6", 600]
+];
+
+let total=0;
+lines.forEach(([id, delay], index)=>{
+  total += delay;
+  setTimeout(()=>{
+    document.getElementById(id).classList.add("show");
+    tone(520 + index*55, .045, "square", .009);
+  }, total);
+});
+
+setTimeout(()=>{
+  document.getElementById("achieved").classList.add("show");
+  document.getElementById("progress").classList.add("show");
+  successSound();
+}, total + 250);
+
+setTimeout(()=>{
+  const btn=document.getElementById("enter");
+  btn.classList.add("ready");
+  document.getElementById("hint").textContent="A special memory has been unlocked.";
+}, total + 2250);
+
+function showMemories(){
+  clickSound(); stopHum();
+  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+  document.getElementById("memories").classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function showLetter(){
+  clickSound();
+  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+  document.getElementById("letter").classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+</script>
+
+
+<!-- REAL COMPUTER PROCESSING AUDIO: BOOT INTRO ONLY -->
+<audio id="computerProcessingAudio"
+       src="sounds/computer-noise.mp3"
+       preload="auto"
+       loop
+       playsinline></audio>
+
+<script>
+(() => {
+  const audio = document.getElementById('computerProcessingAudio');
+  if (!audio) return;
+
+  audio.loop = true;
+  audio.volume = 0.12;
+
+  let fadeTimer = null;
+  let bootFinished = false;
+
+  function fadeTo(target, duration = 700) {
+    clearInterval(fadeTimer);
+    const startVolume = audio.volume;
+    const steps = 24;
+    const delta = (target - startVolume) / steps;
+    let step = 0;
+
+    fadeTimer = setInterval(() => {
+      step++;
+      audio.volume = Math.max(0, Math.min(1, startVolume + delta * step));
+
+      if (step >= steps) {
+        clearInterval(fadeTimer);
+        fadeTimer = null;
+
+        if (target === 0) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      }
+    }, duration / steps);
+  }
+
+  async function startBootAudio() {
+    if (bootFinished) return;
+
+    try {
+      audio.currentTime = 0;
+      audio.volume = 0.12;
+      await audio.play();
+    } catch (e) {
+      // Browser may block autoplay. First interaction is only a fallback.
+    }
+  }
+
+  function finishBootAudio() {
+    if (bootFinished) return;
+    bootFinished = true;
+    fadeTo(0, 800);
+  }
+
+  // Try autoplay immediately.
+  window.addEventListener('load', startBootAudio);
+
+  // Fallback if browser blocks autoplay.
+  const unlock = () => {
+    if (!bootFinished) startBootAudio();
+    window.removeEventListener('pointerdown', unlock);
+    window.removeEventListener('keydown', unlock);
+    window.removeEventListener('touchstart', unlock);
+  };
+
+  window.addEventListener('pointerdown', unlock, { once: true });
+  window.addEventListener('keydown', unlock, { once: true });
+  window.addEventListener('touchstart', unlock, { once: true });
+
+  /*
+   * IMPORTANT:
+   * The audio is ONLY allowed during the opening boot sequence.
+   * As soon as "DAY 100 ACHIEVED." becomes visible, it stops permanently
+   * for this page session. Navigating to Memory Archive or Final Message
+   * cannot restart it.
+   */
+  function watchDay100() {
+    const target = [...document.querySelectorAll('*')].find(el =>
+      (el.textContent || '').trim() === 'DAY 100 ACHIEVED.'
+    );
+
+    if (!target) {
+      setTimeout(watchDay100, 200);
+      return;
+    }
+
+    const isVisible = () => {
+      const style = getComputedStyle(target);
+      const rect = target.getBoundingClientRect();
+      return style.display !== 'none' &&
+             style.visibility !== 'hidden' &&
+             parseFloat(style.opacity || '1') > 0 &&
+             rect.width > 0 &&
+             rect.height > 0;
+    };
+
+    const observer = new MutationObserver(() => {
+      if (isVisible()) {
+        finishBootAudio();
+        observer.disconnect();
+      }
+    });
+
+    observer.observe(target, {
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    });
+
+    // Also check periodically in case the intro uses a timer/animation
+    // without changing observed attributes.
+    const poll = setInterval(() => {
+      if (isVisible()) {
+        clearInterval(poll);
+        observer.disconnect();
+        finishBootAudio();
+      }
+    }, 150);
+  }
+
+  watchDay100();
+
+  // Deliberately NO click/reboot handler here.
+  // This prevents the computer-noise audio from restarting in the
+  // Memory Archive or Final Message sections.
+})();
+</script>
+
+
+<script id="final-scroll-runtime-fix">
+(() => {
+  function enablePageScroll() {
+    document.documentElement.style.setProperty('overflow-y', 'auto', 'important');
+    document.documentElement.style.setProperty('height', 'auto', 'important');
+    document.body.style.setProperty('overflow-y', 'auto', 'important');
+    document.body.style.setProperty('height', 'auto', 'important');
+    document.body.style.setProperty('max-height', 'none', 'important');
+  }
+
+  enablePageScroll();
+
+  // Re-apply after UI navigation because some existing code may lock body scrolling.
+  document.addEventListener('click', () => {
+    requestAnimationFrame(enablePageScroll);
+    setTimeout(enablePageScroll, 100);
+    setTimeout(enablePageScroll, 500);
+  });
+
+  // Watch class/style changes that could re-lock the body.
+  const observer = new MutationObserver(enablePageScroll);
+  observer.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] });
+})();
+</script>
+
+</body>
+</html>
