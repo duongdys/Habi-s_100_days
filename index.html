@@ -196,7 +196,7 @@ body{
 <style id="final-message-scroll-fix">
 /* ===== FINAL MESSAGE SCROLL FIX ===== */
 
-/* Allow the document itself to grow and scroll vertically. */
+/* Page can scroll normally. */
 html, body {
   min-height: 100%;
   height: auto !important;
@@ -204,137 +204,83 @@ html, body {
   overflow-y: auto !important;
 }
 
-/* Any full-screen app/root wrapper must not clip later content. */
-body,
-#app,
-.app,
-.main,
-main,
-.page,
-.pages,
-.screen,
-.section,
-.scene,
-.container {
-  max-height: none !important;
-}
-
-/* Final section should behave like a normal long page, not a clipped viewport panel. */
-#final,
-#final-message,
-.final,
-.final-message,
-.finalMessage,
-[data-section="final"],
-[data-page="final"] {
+/* Only the actual final-message screen is allowed to grow.
+   IMPORTANT: do not target ".final" because that class is also used by
+   the small "CONNECTION REMAINS ACTIVE" line inside the letter. */
+#letter {
   position: relative !important;
-  inset: auto !important;
-  top: auto !important;
-  left: auto !important;
-  right: auto !important;
-  bottom: auto !important;
   width: 100% !important;
   height: auto !important;
   min-height: 100vh !important;
   max-height: none !important;
   overflow: visible !important;
   box-sizing: border-box !important;
-  padding-bottom: 72px !important;
+  padding: 24px 18px 36px !important;
+  align-items: flex-start !important;
 }
 
-/* Let common inner wrappers expand with the letter. */
-#final .content,
-#final-message .content,
-.final .content,
-.final-message .content,
-.finalMessage .content,
-#final .panel,
-#final-message .panel,
-.final .panel,
-.final-message .panel,
-#final .terminal,
-#final-message .terminal,
-.final .terminal,
-.final-message .terminal,
-#final .letter,
-#final-message .letter,
-.final .letter,
-.final-message .letter,
-.letter-panel,
-.message-panel,
-.final-panel {
+/* Outer frame wraps content naturally instead of creating a tall empty area. */
+#letter .final-system {
+  width: min(760px, 92vw);
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
   overflow: visible !important;
-  position: relative !important;
+  margin: 24px auto 0 !important;
+  padding: clamp(20px, 4vw, 36px) !important;
   box-sizing: border-box !important;
 }
 
-/* Prevent the personal letter text from being visually cut off. */
-#final p,
-#final-message p,
-.final p,
-.final-message p,
-#final .letter,
-#final-message .letter,
-.final .letter,
-.final-message .letter,
-.personal-message,
-.message-body,
-.letter-body {
-  overflow: visible !important;
+/* Letter panel stays compact and grows only as much as its text needs. */
+#letter .system-letter {
+  height: auto !important;
+  min-height: 0 !important;
   max-height: none !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere;
-  word-break: normal;
+  overflow: visible !important;
+  padding: clamp(22px, 4vw, 36px) !important;
 }
 
-/* Replay/Reboot control must remain inside the content flow. */
-#final button,
-#final-message button,
-.final button,
-.final-message button,
-#final a.button,
-#final-message a.button,
-.final a.button,
-.final-message a.button,
-.replay-button,
-.reboot-button,
-#replay,
-#reboot {
+/* The small final status line must remain a normal line, never a full-height panel. */
+#letter .system-letter .final {
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 0 !important;
+  margin-top: 24px !important;
+  overflow: visible !important;
+}
+
+/* Keep Replay close to the letter and inside normal content flow. */
+#letter .replay {
   position: relative !important;
   inset: auto !important;
-  left: auto !important;
-  right: auto !important;
-  bottom: auto !important;
-  top: auto !important;
   transform: none !important;
-  margin-top: 28px !important;
-  margin-bottom: 24px !important;
-  max-width: calc(100vw - 32px);
+  margin: 22px auto 6px !important;
+  max-width: calc(100vw - 36px);
   box-sizing: border-box;
 }
 
-/* Give the user comfortable breathing room at the very bottom. */
+/* Avoid excessive bottom whitespace. */
 body::after {
   content: "";
   display: block;
-  height: 24px;
+  height: 8px;
 }
 
-/* Mobile safety */
 @media (max-width: 700px) {
-  #final,
-  #final-message,
-  .final,
-  .final-message,
-  .finalMessage,
-  [data-section="final"],
-  [data-page="final"] {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    padding-bottom: 56px !important;
+  #letter {
+    padding: 14px 12px 26px !important;
+  }
+
+  #letter .final-system {
+    width: 100%;
+    margin-top: 12px !important;
+    padding: 18px !important;
+  }
+
+  #letter .system-letter {
+    padding: 20px 18px !important;
   }
 }
 </style>
@@ -455,18 +401,11 @@ function successSound(){
 function clickSound(){
   initAudio(); tone(280,.045,"square",.018);
 }
-function archiveHum(){
-  if(!audioCtx) return;
-  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-  o.type="sine";o.frequency.value=55;g.gain.value=.006;
-  o.connect(g);g.connect(audioCtx.destination);o.start();
-  window._hum=o;
-}
 function stopHum(){
   if(window._hum){try{window._hum.stop()}catch(e){} window._hum=null}
 }
 
-document.addEventListener("pointerdown", ()=>{ initAudio(); bootSound(); archiveHum(); }, {once:true});
+document.addEventListener("pointerdown", ()=>{ initAudio(); bootSound(); }, {once:true});
 const lines = [
   ["l1", 650],
   ["l2", 850],
@@ -512,7 +451,7 @@ function showLetter(){
 </script>
 
 
-<!-- REAL COMPUTER PROCESSING AUDIO: BOOT INTRO ONLY -->
+<!-- REAL COMPUTER PROCESSING AUDIO: INTRO ONLY -->
 <audio id="computerProcessingAudio"
        src="sounds/computer-noise.mp3"
        preload="auto"
@@ -522,18 +461,20 @@ function showLetter(){
 <script>
 (() => {
   const audio = document.getElementById('computerProcessingAudio');
-  if (!audio) return;
+  const enterBtn = document.getElementById('enter');
+  if (!audio || !enterBtn) return;
 
   audio.loop = true;
   audio.volume = 0.12;
 
   let fadeTimer = null;
-  let bootFinished = false;
+  let introAudioFinished = false;
 
-  function fadeTo(target, duration = 700) {
+  function fadeTo(target, duration = 550) {
     clearInterval(fadeTimer);
+
     const startVolume = audio.volume;
-    const steps = 24;
+    const steps = 20;
     const delta = (target - startVolume) / steps;
     let step = 0;
 
@@ -553,30 +494,30 @@ function showLetter(){
     }, duration / steps);
   }
 
-  async function startBootAudio() {
-    if (bootFinished) return;
+  async function startIntroAudio() {
+    if (introAudioFinished) return;
 
     try {
       audio.currentTime = 0;
       audio.volume = 0.12;
       await audio.play();
     } catch (e) {
-      // Browser may block autoplay. First interaction is only a fallback.
+      // If autoplay is blocked, first interaction below is the fallback.
     }
   }
 
-  function finishBootAudio() {
-    if (bootFinished) return;
-    bootFinished = true;
-    fadeTo(0, 800);
+  function stopIntroAudio() {
+    if (introAudioFinished) return;
+    introAudioFinished = true;
+    fadeTo(0, 550);
   }
 
-  // Try autoplay immediately.
-  window.addEventListener('load', startBootAudio);
+  // Try to start as soon as the page loads.
+  window.addEventListener('load', startIntroAudio);
 
-  // Fallback if browser blocks autoplay.
+  // Browser autoplay fallback.
   const unlock = () => {
-    if (!bootFinished) startBootAudio();
+    if (!introAudioFinished) startIntroAudio();
     window.removeEventListener('pointerdown', unlock);
     window.removeEventListener('keydown', unlock);
     window.removeEventListener('touchstart', unlock);
@@ -586,61 +527,34 @@ function showLetter(){
   window.addEventListener('keydown', unlock, { once: true });
   window.addEventListener('touchstart', unlock, { once: true });
 
-  /*
-   * IMPORTANT:
-   * The audio is ONLY allowed during the opening boot sequence.
-   * As soon as "DAY 100 ACHIEVED." becomes visible, it stops permanently
-   * for this page session. Navigating to Memory Archive or Final Message
-   * cannot restart it.
-   */
-  function watchDay100() {
-    const target = [...document.querySelectorAll('*')].find(el =>
-      (el.textContent || '').trim() === 'DAY 100 ACHIEVED.'
-    );
-
-    if (!target) {
-      setTimeout(watchDay100, 200);
-      return;
+  // Stop ONLY when the full intro has finished and the
+  // [ ACCESS MEMORY ARCHIVE ] button is actually visible/ready.
+  const observer = new MutationObserver(() => {
+    if (enterBtn.classList.contains('ready')) {
+      stopIntroAudio();
+      observer.disconnect();
     }
+  });
 
-    const isVisible = () => {
-      const style = getComputedStyle(target);
-      const rect = target.getBoundingClientRect();
-      return style.display !== 'none' &&
-             style.visibility !== 'hidden' &&
-             parseFloat(style.opacity || '1') > 0 &&
-             rect.width > 0 &&
-             rect.height > 0;
-    };
+  observer.observe(enterBtn, {
+    attributes: true,
+    attributeFilter: ['class']
+  });
 
-    const observer = new MutationObserver(() => {
-      if (isVisible()) {
-        finishBootAudio();
-        observer.disconnect();
-      }
-    });
-
-    observer.observe(target, {
-      attributes: true,
-      attributeFilter: ['style', 'class']
-    });
-
-    // Also check periodically in case the intro uses a timer/animation
-    // without changing observed attributes.
-    const poll = setInterval(() => {
-      if (isVisible()) {
-        clearInterval(poll);
-        observer.disconnect();
-        finishBootAudio();
-      }
-    }, 150);
+  // Safety in case the class is already present before observer attaches.
+  if (enterBtn.classList.contains('ready')) {
+    stopIntroAudio();
+    observer.disconnect();
   }
 
-  watchDay100();
-
-  // Deliberately NO click/reboot handler here.
-  // This prevents the computer-noise audio from restarting in the
-  // Memory Archive or Final Message sections.
+  // Absolute safety: leaving the intro can never keep this MP3 playing.
+  const originalShowMemories = window.showMemories;
+  window.showMemories = function() {
+    stopIntroAudio();
+    if (typeof originalShowMemories === 'function') {
+      return originalShowMemories.apply(this, arguments);
+    }
+  };
 })();
 </script>
 
