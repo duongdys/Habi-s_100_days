@@ -24,6 +24,81 @@ body{
 .screen{min-height:100vh;display:none;position:relative;overflow:hidden}
 .screen.active{display:flex}
 
+
+/* ===== PRE-BOOT NOTIFICATION GATE ===== */
+#gate{
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 50% 45%,#121d2b 0,#090d15 42%,#04060a 82%);
+  cursor:pointer;
+  user-select:none;
+}
+.gate-wrap{
+  position:relative;
+  z-index:3;
+  width:min(520px,88vw);
+  text-align:center;
+  padding:46px 28px 38px;
+  border:1px solid #314356;
+  background:#070c13d9;
+  box-shadow:0 0 70px #000, inset 0 0 38px #8ddcff07;
+  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;
+}
+#gate:hover .gate-wrap,
+#gate:focus-visible .gate-wrap{
+  transform:translateY(-2px);
+  border-color:#63849d;
+  box-shadow:0 0 70px #000,0 0 26px #8ddcff12,inset 0 0 38px #8ddcff09;
+}
+.gate-eyebrow{
+  color:#708397;
+  font-size:10px;
+  letter-spacing:.18em;
+  margin-bottom:28px;
+}
+.gate-icon{
+  position:relative;
+  width:86px;height:86px;
+  margin:0 auto 24px;
+  display:grid;place-items:center;
+  border:1px solid #496177;
+  color:var(--cyan);
+  font:700 42px/1 "Courier New",Consolas,monospace;
+  text-shadow:0 0 18px #8ddcff88;
+  box-shadow:inset 0 0 25px #8ddcff08,0 0 22px #8ddcff0b;
+  animation:gatePulse 2s ease-in-out infinite;
+}
+.gate-icon:before,.gate-icon:after{
+  content:"";position:absolute;width:12px;height:12px;
+  border-color:#8ddcff88;
+}
+.gate-icon:before{left:-5px;top:-5px;border-left:1px solid;border-top:1px solid}
+.gate-icon:after{right:-5px;bottom:-5px;border-right:1px solid;border-bottom:1px solid}
+@keyframes gatePulse{50%{box-shadow:inset 0 0 30px #8ddcff0d,0 0 34px #8ddcff20}}
+.gate-title{
+  color:#d9e8f3;
+  font-size:clamp(15px,3vw,20px);
+  letter-spacing:.12em;
+  margin-bottom:12px;
+}
+.gate-text{color:#7f91a4;font-size:11px;line-height:1.8;letter-spacing:.05em}
+.gate-open{
+  margin-top:27px;
+  color:#9eddf7;
+  font-size:11px;
+  letter-spacing:.12em;
+  animation:gateBlink 1.35s steps(1) infinite;
+}
+@keyframes gateBlink{50%{opacity:.45}}
+.gate-corner{
+  position:absolute;left:18px;bottom:14px;
+  color:#405164;font-size:9px;letter-spacing:.08em;
+}
+#gate.gate-exit{animation:gateExit .36s ease forwards}
+@keyframes gateExit{to{opacity:0;transform:scale(1.015)}}
+@media(max-width:520px){.gate-wrap{padding:40px 20px 34px}.gate-icon{width:76px;height:76px}}
+
 #intro{
   align-items:center;
   justify-content:center;
@@ -191,6 +266,87 @@ body{
   color:#b9c7d7;padding:11px 18px;border-radius:2px;cursor:pointer;font:inherit;font-size:11px
 }
 
+
+
+/* ===== MEMORY VIDEO EXPAND / RETURN ===== */
+.memory-video{cursor:pointer;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,opacity .2s ease}
+.memory-video:hover,.memory-video:focus-visible{border-color:#6db9dc;box-shadow:0 16px 42px #000c,0 0 24px #8ddcff18;outline:none}
+.memory-video:hover .video,.memory-video:focus-visible .video{border-color:#5f9fbe}
+.memory-thumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.82) brightness(.72) contrast(1.08);transition:.3s ease}
+.memory-video:hover .memory-thumb,.memory-video:focus-visible .memory-thumb{filter:saturate(1) brightness(.9) contrast(1.08);transform:scale(1.025)}
+.memory-video .play{position:relative;z-index:3;background:#07101acc;backdrop-filter:blur(3px);transition:.25s ease;box-shadow:0 0 0 0 #8ddcff00}
+.memory-video:hover .play,.memory-video:focus-visible .play{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 24px #8ddcff35;transform:scale(1.08)}
+.scan-overlay{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:.13;background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,#bde8ff 4px);mix-blend-mode:screen}
+.memory-action{position:absolute;left:0;right:0;bottom:12px;z-index:3;text-align:center;color:#d8f4ff;font-size:10px;letter-spacing:.09em;text-shadow:0 1px 8px #000}
+
+/* Click scan: a bright system beam sweeps through the selected card before expansion. */
+.memory-video.scanning{z-index:8;border-color:var(--cyan);box-shadow:0 0 0 1px #8ddcff88,0 0 36px #8ddcff4a,0 18px 48px #000d}
+.memory-video.scanning .video:after{content:"";position:absolute;left:-4%;right:-4%;top:-22%;height:24%;z-index:7;pointer-events:none;background:linear-gradient(to bottom,transparent,#8ddcff22 18%,#d8f7ffdd 48%,#8ddcff55 55%,transparent);box-shadow:0 0 22px #8ddcffaa;animation:memoryScan .56s cubic-bezier(.35,0,.2,1) forwards}
+.memory-video.scanning .scan-overlay{opacity:.46;animation:scanFlicker .12s steps(2) infinite}
+.memory-video.scanning .play{transform:scale(.9);opacity:.4}
+@keyframes memoryScan{from{transform:translateY(0)}to{transform:translateY(520%)}}
+@keyframes scanFlicker{50%{opacity:.18}}
+
+.memory-modal{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:#02050a00;backdrop-filter:blur(0);opacity:0;visibility:hidden;pointer-events:none;transition:background .34s ease,backdrop-filter .34s ease,opacity .2s ease}
+.memory-modal.open{visibility:visible;pointer-events:auto;opacity:1;background:#02050ae6;backdrop-filter:blur(8px)}
+.memory-modal-shell{width:min(1000px,94vw);max-height:92vh;overflow:auto;border:1px solid #405064;background:#080c13;box-shadow:0 30px 100px #000,0 0 50px #8ddcff18;position:relative;opacity:0;transition:opacity .16s ease}
+.memory-modal.ready .memory-modal-shell{opacity:1}
+.memory-modal-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 16px;border-bottom:1px solid #273242;color:#8ddcff;font-size:11px;letter-spacing:.08em}
+.memory-modal-title strong{display:block;color:#e2edf7;font-weight:400;margin-top:5px;letter-spacing:.03em}
+.memory-modal-close{border:1px solid #405064;background:transparent;color:#b9c7d7;font:inherit;font-size:11px;padding:8px 11px;cursor:pointer}
+.memory-modal-close:hover{border-color:var(--cyan);color:var(--cyan);background:#8ddcff0d}
+.memory-modal-frame{background:#000;position:relative;aspect-ratio:16/9}
+.memory-modal-frame video{display:block;width:100%;height:100%;object-fit:contain;background:#000}
+.memory-modal-foot{padding:11px 16px 13px;color:#708294;font-size:10px;letter-spacing:.07em;border-top:1px solid #1d2935}
+
+/* Temporary clone travels from the clicked card to the player and back. */
+.memory-flight{position:fixed;z-index:10020;margin:0!important;pointer-events:none;transform:none!important;opacity:1!important;transition:left .5s cubic-bezier(.22,.78,.2,1),top .5s cubic-bezier(.22,.78,.2,1),width .5s cubic-bezier(.22,.78,.2,1),height .5s cubic-bezier(.22,.78,.2,1),border-radius .5s ease,box-shadow .5s ease;background:#0b1119!important;color:#cbd8e6!important;border:1px solid #65cfff!important;box-shadow:0 0 0 1px #8ddcff66,0 22px 70px #000e,0 0 42px #8ddcff35!important;overflow:hidden}
+.memory-flight .video{height:100%;aspect-ratio:auto!important;border:0!important}
+.memory-flight small,.memory-flight>strong,.memory-flight .memory-action{opacity:0!important}
+.memory-flight .play{opacity:0!important}
+.memory-flight.arrived{border-radius:0}
+.memory-video.memory-origin-hidden{visibility:hidden}
+
+@media(max-width:700px){.memory-modal{padding:10px}.memory-modal-shell{width:100%;max-height:96vh}.memory-modal-head{padding:11px 12px}.memory-modal-foot{padding:9px 12px}.memory-action{bottom:8px;font-size:9px}}
+
+.final-actions{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin:22px auto 6px;
+  flex-wrap:wrap;
+}
+.final-actions .back-memory,
+.final-actions .replay{
+  display:inline-block;
+  margin:0 !important;
+  background:transparent;
+  border:1px solid #405064;
+  color:#b9c7d7;
+  padding:11px 18px;
+  border-radius:2px;
+  cursor:pointer;
+  font:inherit;
+  font-size:11px;
+  transition:.25s;
+}
+.final-actions .back-memory:hover,
+.final-actions .replay:hover{
+  border-color:var(--cyan);
+  color:#dff5ff;
+  background:#8ddcff10;
+  box-shadow:0 0 18px #8ddcff16;
+}
+@media(max-width:520px){
+  .final-actions{
+    flex-direction:column;
+  }
+  .final-actions .back-memory,
+  .final-actions .replay{
+    width:100%;
+  }
+}
 </style>
 
 <style id="final-message-scroll-fix">
@@ -285,10 +441,155 @@ body::after {
 }
 </style>
 
+
+<style id="final-actions-alignment-fix">
+/* Keep both final-message controls on exactly the same baseline. */
+#letter .final-actions{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:16px !important;
+  margin:22px auto 6px !important;
+}
+
+#letter .final-actions .back-memory,
+#letter .final-actions .replay{
+  position:relative !important;
+  inset:auto !important;
+  transform:none !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin:0 !important;
+  min-height:38px !important;
+  padding:11px 18px !important;
+  line-height:1 !important;
+  box-sizing:border-box !important;
+}
+
+@media(max-width:520px){
+  #letter .final-actions{
+    flex-direction:column !important;
+  }
+
+  #letter .final-actions .back-memory,
+  #letter .final-actions .replay{
+    width:100% !important;
+  }
+}
+</style>
+
+
+<style id="end-transmission-style">
+/* ===== END TRANSMISSION / CRT POWER-OFF ===== */
+.final-actions .end-transmission{
+  display:inline-flex;align-items:center;justify-content:center;
+  margin:0!important;background:transparent;border:1px solid #5b3a43;
+  color:#d8a9b4;padding:11px 18px;border-radius:2px;cursor:pointer;
+  font:inherit;font-size:11px;transition:.25s;box-sizing:border-box;min-height:38px;
+}
+.final-actions .end-transmission:hover{
+  border-color:#ff7894;color:#ffe7ec;background:#ff78940c;
+  box-shadow:0 0 18px #ff789420;
+}
+@media(max-width:520px){.final-actions .end-transmission{width:100%!important}}
+
+#shutdownOverlay{
+  position:fixed;inset:0;z-index:2147483647;display:none;overflow:hidden;
+  background:#020406;pointer-events:all;isolation:isolate;
+}
+#shutdownOverlay.active{display:block}
+#shutdownOverlay .shutdown-screen{
+  position:absolute;inset:0;background:#05090e;overflow:hidden;
+  transform-origin:center center;will-change:transform,filter,opacity;
+}
+#shutdownOverlay .shutdown-screen::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.22;
+  background:repeating-linear-gradient(to bottom,transparent 0 2px,#9de8ff14 2px 3px);
+}
+#shutdownOverlay .shutdown-center{
+  position:absolute;inset:0;display:grid;place-items:center;text-align:center;
+  font-family:"Courier New",Consolas,monospace;color:#9bdcf3;letter-spacing:.12em;
+}
+#shutdownOverlay .shutdown-label{font-size:clamp(12px,1.7vw,18px);text-shadow:0 0 14px #8ddcff55}
+#shutdownOverlay .shutdown-label small{display:block;margin-top:12px;color:#617687;font-size:10px;letter-spacing:.16em}
+#shutdownOverlay .shutdown-beam{
+  position:absolute;left:0;right:0;top:50%;height:2px;opacity:0;
+  background:#e9fbff;box-shadow:0 0 12px #fff,0 0 36px #8ddcff,0 0 80px #8ddcff;
+  transform:translateY(-50%) scaleX(.02);
+}
+#shutdownOverlay.active .shutdown-screen{animation:crtCollapse 1.05s cubic-bezier(.7,0,.3,1) .38s forwards}
+#shutdownOverlay.active .shutdown-center{animation:shutdownText .42s ease forwards}
+#shutdownOverlay.active .shutdown-beam{animation:shutdownBeam .68s ease .84s forwards}
+#shutdownOverlay.done{background:#000}
+#shutdownOverlay.done .shutdown-screen{opacity:0}
+@keyframes shutdownText{to{opacity:0;filter:blur(3px)}}
+@keyframes crtCollapse{
+  0%{transform:scale(1,1);filter:brightness(1)}
+  58%{transform:scale(1,.018);filter:brightness(3.8)}
+  82%{transform:scale(.10,.008);filter:brightness(6)}
+  100%{transform:scale(0,.004);filter:brightness(8);opacity:0}
+}
+@keyframes shutdownBeam{
+  0%{opacity:0;transform:translateY(-50%) scaleX(.02)}
+  20%{opacity:1;transform:translateY(-50%) scaleX(.9)}
+  75%{opacity:1;transform:translateY(-50%) scaleX(.08)}
+  100%{opacity:0;transform:translateY(-50%) scaleX(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  #shutdownOverlay.active .shutdown-screen{animation:shutdownFade .45s ease forwards}
+  #shutdownOverlay.active .shutdown-beam{display:none}
+  @keyframes shutdownFade{to{opacity:0}}
+}
+</style>
+
+<style id="letter-typewriter-style">
+/* ===== LETTER TYPEWRITER EFFECT ===== */
+#letter:not(.active) .system-letter{
+  visibility:hidden;
+}
+
+.system-letter.typing .typewriter-item{
+  visibility:hidden;
+}
+
+.system-letter.typing .typewriter-item.typing-active,
+.system-letter.typing .typewriter-item.typing-done{
+  visibility:visible;
+}
+
+.typewriter-cursor{
+  display:inline-block;
+  width:7px;
+  height:1em;
+  margin-left:3px;
+  vertical-align:-2px;
+  background:#8ddcff;
+  box-shadow:0 0 8px #8ddcff;
+  animation:letterCursorBlink .7s steps(1) infinite;
+}
+
+@keyframes letterCursorBlink{
+  50%{opacity:0}
+}
+</style>
+
 </head>
 <body>
 
-<section id="intro" class="screen active">
+<section id="gate" class="screen active" role="button" tabindex="0" aria-label="Open important notification" onclick="enterMemorySystem()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();enterMemorySystem()}">
+  <div class="scanlines"></div><div class="vignette"></div>
+  <div class="gate-wrap">
+    <div class="gate-eyebrow">SECURE CHANNEL / INCOMING DATA</div>
+    <div class="gate-icon" aria-hidden="true">!</div>
+    <div class="gate-title">[ IMPORTANT NOTIFICATION ]</div>
+    <div class="gate-text">A restricted memory package is waiting for authentication.</div>
+    <div class="gate-open">&gt; CLICK TO ACKNOWLEDGE</div>
+    <div class="gate-corner">AUTHORIZATION REQUIRED</div>
+  </div>
+</section>
+
+<section id="intro" class="screen">
   <div class="scanlines"></div><div class="vignette"></div>
   <div class="system-shell">
     <div class="system-header">
@@ -324,9 +625,9 @@ body::after {
       <p>&gt; Six memory fragments recovered from the last 100 days.</p>
     </div>
     <div class="gallery">
-      <article class="memory" style="--r:-2deg;--d:.1s"><div class="video"><div class="play">▶</div></div><small>ARCHIVE 001</small><strong>First connection</strong></article>
-      <article class="memory" style="--r:1.5deg;--d:.3s"><div class="video"><div class="play">▶</div></div><small>ARCHIVE 002</small><strong>A moment worth keeping</strong></article>
-      <article class="memory" style="--r:-1deg;--d:.5s"><div class="video"><div class="play">▶</div></div><small>ARCHIVE 003</small><strong>Memory fragment detected</strong></article>
+      <article class="memory memory-video" style="--r:-2deg;--d:.1s" tabindex="0" role="button" aria-label="Play Archive 001" onclick="openMemoryVideo(this,'videos/archive-001.mp4','ARCHIVE 001','First connection')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMemoryVideo(this,'videos/archive-001.mp4','ARCHIVE 001','First connection')}"><div class="video"><img class="memory-thumb" src="images/archive-001.jpg" alt="Archive 001 thumbnail"><div class="scan-overlay"></div><div class="play"><span>▶</span></div><div class="memory-action">[ PLAY MEMORY ]</div></div><small>ARCHIVE 001</small><strong>First connection</strong></article>
+      <article class="memory memory-video" style="--r:1.5deg;--d:.3s" tabindex="0" role="button" aria-label="Play Archive 002" onclick="openMemoryVideo(this,'videos/archive-002.mp4','ARCHIVE 002','A moment worth keeping')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMemoryVideo(this,'videos/archive-002.mp4','ARCHIVE 002','A moment worth keeping')}"><div class="video"><img class="memory-thumb" src="images/archive-002.jpg" alt="Archive 002 thumbnail"><div class="scan-overlay"></div><div class="play"><span>▶</span></div><div class="memory-action">[ PLAY MEMORY ]</div></div><small>ARCHIVE 002</small><strong>A moment worth keeping</strong></article>
+      <article class="memory memory-video" style="--r:-1deg;--d:.5s" tabindex="0" role="button" aria-label="Play Archive 003" onclick="openMemoryVideo(this,'videos/archive-003.mp4','ARCHIVE 003','Memory fragment detected')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMemoryVideo(this,'videos/archive-003.mp4','ARCHIVE 003','Memory fragment detected')}"><div class="video"><img class="memory-thumb" src="images/archive-003.jpg" alt="Archive 003 thumbnail"><div class="scan-overlay"></div><div class="play"><span>▶</span></div><div class="memory-action">[ PLAY MEMORY ]</div></div><small>ARCHIVE 003</small><strong>Memory fragment detected</strong></article>
       <article class="memory" style="--r:2deg;--d:.7s"><div class="video"><div class="play">▶</div></div><small>ARCHIVE 004</small><strong>Another day, another memory</strong></article>
       <article class="memory" style="--r:-1.5deg;--d:.9s"><div class="video"><div class="play">▶</div></div><small>ARCHIVE 005</small><strong>Connection still active</strong></article>
       <article class="memory" style="--r:1deg;--d:1.1s"><div class="video"><div class="play">▶</div></div><small>ARCHIVE 006</small><strong>Milestone: DAY 100</strong></article>
@@ -353,19 +654,51 @@ body::after {
     <article class="system-letter">
       <div class="letter-label">PERSONAL MESSAGE // DAY 100</div>
       <div class="date">Tháng 9, 2026</div>
-      <h2>Chào ký chủ Habi,</h2>
+      <h2>Chào ký chủ Habi NÈ,</h2>
       <p>Lại là tôi - hệ thống sô 098 - điểm danh mỗi khi Habi stream đây. Có điều hôm nay có chút đặc biệt hơn.</p>
       <p>100 ngày có thể không phải là một khoảng thời gian quá dài, nhưng trong từng ngày đó lại có rất nhiều khoảnh khắc nhỏ mà tôi muốn lưu giữ và trân trọng.</p>
       <p>Dù tôi có thể chỉ là 1 hệ thống vô tri nhưng cảm ơn vì những buổi stream, những câu chuyện, những tiếng cười và cả những khoảnh khắc rất bình thường nhưng somehow lại khiến một ngày của tôi đỡ tẻ nhạt.</p>
+      <p>Những việc đó nghe tuy có vẻ rất nhỏ trong cuộc sống bộn bề này, nhưng với tôi , chúng đều có ý nghĩa đặc biệt. Tuy tôi chưa thể hiểu chắc chắn, nhưng có lẽ, một tình bạn đẹp chính là như vậy.</p>
       <p>Nhân ngày hôm nay, tôi đã mượn 1 chút sức mạnh từ thế giới của tôi để can thiệp và làm chiếc website nhỏ này không phải vì 100 ngày là một con số quá lớn, mà vì mình muốn nói rằng: <em>Tôi thật sự rất vui vì có thể gặp Habi và mọi người trong công ty chúng ta.</em></p>
-      <p>Chúc cho những ngày tiếp theo cũng sẽ có thật nhiều niềm vui. Và nếu có thể, tôi sẽ cố gắng và tiếp tục đồng hành thêm thật nhiều ngày nữa. Có thể là 200, 300, 400, 1000 ngày... ai mà biết được chứ ^^</p>
+      <p>Chúc cho những ngày tiếp theo cũng sẽ có thật nhiều niềm vui, nhiều kỷ niệm đẹp hơn nữa. Và nếu có thể, tôi sẽ cố gắng và tiếp tục đồng hành thêm thật nhiều ngày nữa. Có thể là 200, 300, 400, 1000 ngày... ai mà biết được chứ ^^</p>
+      <p>Lời cuối thư, tôi chỉ muốn nói rằng tôi có thể không phải là người đầu tiên, không phải người duy nhất, nhưng tôi thật lòng mong muốn tôi có thể là một trong những người đồng hành cuối cùng của Habi trên con đường này.</p>
       <div class="signature">&gt; From, Hệ thống số 098</div>
-      <div class="final">CONNECTION REMAINS ACTIVE ♡</div>
+      <div class="final">CONNECTION REMAINS ACTIVE . . .</div>
     </article>
 
-    <button class="replay" onclick="location.reload()">[ REBOOT MEMORY SYSTEM ]</button>
+    <div class="final-actions">
+      <button class="back-memory" onclick="backToMemories()">[ BACK TO MEMORY ARCHIVE ]</button>
+      <button class="replay" onclick="stopLetterMusic(); location.reload()">[ REBOOT MEMORY SYSTEM ]</button>
+      <button class="end-transmission" onclick="endTransmission()">[ END TRANSMISSION ]</button>
+    </div>
   </div>
 </section>
+
+
+<div id="shutdownOverlay" aria-hidden="true">
+  <div class="shutdown-screen">
+    <div class="shutdown-center">
+      <div class="shutdown-label">&gt; TERMINATING CONNECTION...<small>MEMORY ARCHIVE / CORE-100</small></div>
+    </div>
+    <div class="shutdown-beam"></div>
+  </div>
+</div>
+
+<div id="memoryVideoModal" class="memory-modal" aria-hidden="true" onclick="if(event.target===this) closeMemoryVideo()">
+  <div class="memory-modal-shell" role="dialog" aria-modal="true" aria-labelledby="memoryModalArchive">
+    <div class="memory-modal-head">
+      <div class="memory-modal-title">
+        <span id="memoryModalArchive">ARCHIVE</span>
+        <strong id="memoryModalTitle">Memory fragment</strong>
+      </div>
+      <button class="memory-modal-close" type="button" onclick="closeMemoryVideo()">[ CLOSE ]</button>
+    </div>
+    <div class="memory-modal-frame">
+      <video id="memoryModalVideo" controls playsinline preload="metadata"></video>
+    </div>
+    <div class="memory-modal-foot">&gt; MEMORY PLAYBACK ACTIVE &nbsp; | &nbsp; ESC TO CLOSE</div>
+  </div>
+</div>
 
 <script>
 
@@ -401,11 +734,30 @@ function successSound(){
 function clickSound(){
   initAudio(); tone(280,.045,"square",.018);
 }
+
+// Memory-card UI sounds: short, quiet sci-fi data blips that match the terminal theme.
+let lastMemoryHoverAt=0;
+function memoryHoverSound(){
+  initAudio();
+  const now=performance.now();
+  if(now-lastMemoryHoverAt<90) return;
+  lastMemoryHoverAt=now;
+  tone(690,.035,"sine",.010);
+  tone(980,.045,"sine",.008,.025);
+}
+function memoryOpenSound(){
+  initAudio();
+  // Low confirmation tick + rising data-access chirp before the scan animation.
+  tone(230,.045,"square",.014);
+  tone(520,.055,"sine",.012,.035);
+  tone(820,.070,"sine",.014,.085);
+  tone(1180,.055,"sine",.010,.145);
+}
+
 function stopHum(){
   if(window._hum){try{window._hum.stop()}catch(e){} window._hum=null}
 }
 
-document.addEventListener("pointerdown", ()=>{ initAudio(); bootSound(); }, {once:true});
 const lines = [
   ["l1", 650],
   ["l2", 850],
@@ -415,26 +767,189 @@ const lines = [
   ["l6", 600]
 ];
 
-let total=0;
-lines.forEach(([id, delay], index)=>{
-  total += delay;
+let bootSequenceStarted=false;
+function startBootSequence(){
+  if(bootSequenceStarted) return;
+  bootSequenceStarted=true;
+
+  let total=0;
+  lines.forEach(([id, delay], index)=>{
+    total += delay;
+    setTimeout(()=>{
+      document.getElementById(id).classList.add("show");
+      tone(520 + index*55, .045, "square", .009);
+    }, total);
+  });
+
   setTimeout(()=>{
-    document.getElementById(id).classList.add("show");
-    tone(520 + index*55, .045, "square", .009);
-  }, total);
+    document.getElementById("achieved").classList.add("show");
+    document.getElementById("progress").classList.add("show");
+    successSound();
+  }, total + 250);
+
+  setTimeout(()=>{
+    const btn=document.getElementById("enter");
+    btn.classList.add("ready");
+    document.getElementById("hint").textContent="A special memory has been unlocked.";
+  }, total + 2250);
+}
+
+let gateEntered=false;
+function enterMemorySystem(){
+  if(gateEntered) return;
+  gateEntered=true;
+
+  // This function runs directly from the user's click/keypress. Starting both
+  // WebAudio and the MP3 here lets the same gesture satisfy browser autoplay rules.
+  initAudio();
+  bootSound();
+
+  const processingAudio=document.getElementById("computerProcessingAudio");
+  if(processingAudio){
+    processingAudio.currentTime=0;
+    processingAudio.volume=.12;
+    processingAudio.play().catch(()=>{});
+  }
+
+  const gate=document.getElementById("gate");
+  gate?.classList.add("gate-exit");
+  setTimeout(()=>{
+    document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+    document.getElementById("intro").classList.add("active");
+    window.scrollTo({top:0});
+    startBootSequence();
+  },300);
+}
+
+// Hover/focus feedback for playable memory cards. pointerenter fires once per card,
+// so moving across thumbnail/text inside the same card does not spam the sound.
+document.querySelectorAll(".memory-video").forEach(card=>{
+  card.addEventListener("pointerenter", memoryHoverSound);
+  card.addEventListener("focus", memoryHoverSound);
 });
 
-setTimeout(()=>{
-  document.getElementById("achieved").classList.add("show");
-  document.getElementById("progress").classList.add("show");
-  successSound();
-}, total + 250);
+let activeMemoryOrigin=null;
+let memoryAnimating=false;
 
-setTimeout(()=>{
-  const btn=document.getElementById("enter");
-  btn.classList.add("ready");
-  document.getElementById("hint").textContent="A special memory has been unlocked.";
-}, total + 2250);
+function rectStyle(el){
+  const r=el.getBoundingClientRect();
+  return {left:r.left,top:r.top,width:r.width,height:r.height};
+}
+
+function applyFlightRect(el, r){
+  el.style.left=r.left+"px";
+  el.style.top=r.top+"px";
+  el.style.width=r.width+"px";
+  el.style.height=r.height+"px";
+}
+
+function makeMemoryFlight(origin){
+  const clone=origin.cloneNode(true);
+  clone.removeAttribute("onclick");
+  clone.removeAttribute("onkeydown");
+  clone.removeAttribute("tabindex");
+  clone.removeAttribute("role");
+  clone.removeAttribute("aria-label");
+  clone.classList.remove("scanning");
+  clone.classList.add("memory-flight");
+  clone.style.setProperty("--r","0deg");
+  clone.style.setProperty("--d","0s");
+  const start=rectStyle(origin);
+  applyFlightRect(clone,start);
+  document.body.appendChild(clone);
+  return clone;
+}
+
+async function openMemoryVideo(origin, src, archive, title){
+  if(memoryAnimating || !origin) return;
+  memoryOpenSound();
+  memoryAnimating=true;
+  activeMemoryOrigin=origin;
+
+  const modal=document.getElementById("memoryVideoModal");
+  const shell=modal.querySelector(".memory-modal-shell");
+  const frame=modal.querySelector(".memory-modal-frame");
+  const video=document.getElementById("memoryModalVideo");
+
+  document.getElementById("memoryModalArchive").textContent=archive;
+  document.getElementById("memoryModalTitle").textContent=title;
+
+  // Phase 1: scan the selected card.
+  origin.classList.add("scanning");
+  await new Promise(r=>setTimeout(r,560));
+
+  // Prepare modal invisibly so we can measure the exact video-frame destination.
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
+  const target=rectStyle(frame);
+
+  // Phase 2: clone the card and fly it into the video frame.
+  const flight=makeMemoryFlight(origin);
+  origin.classList.remove("scanning");
+  origin.classList.add("memory-origin-hidden");
+
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      flight.classList.add("arrived");
+      applyFlightRect(flight,target);
+    });
+  });
+
+  await new Promise(r=>setTimeout(r,510));
+
+  // Phase 3: reveal the real player exactly where the animated card arrived.
+  video.src=src;
+  modal.classList.add("ready");
+  flight.remove();
+  memoryAnimating=false;
+  video.play().catch(()=>{});
+}
+
+async function closeMemoryVideo(){
+  const modal=document.getElementById("memoryVideoModal");
+  const shell=modal?.querySelector(".memory-modal-shell");
+  const frame=modal?.querySelector(".memory-modal-frame");
+  const video=document.getElementById("memoryModalVideo");
+  if(!modal || !video || !activeMemoryOrigin || memoryAnimating) return;
+
+  memoryAnimating=true;
+  video.pause();
+
+  // Build a temporary visual from the active card at the current player position.
+  const flight=makeMemoryFlight(activeMemoryOrigin);
+  applyFlightRect(flight,rectStyle(frame));
+  flight.classList.add("arrived");
+
+  // Hide the actual modal shell, leaving the travelling frame visible.
+  modal.classList.remove("ready");
+  await new Promise(r=>setTimeout(r,40));
+
+  // Destination is recalculated so resize/scroll does not break the return path.
+  const target=rectStyle(activeMemoryOrigin);
+  requestAnimationFrame(()=>{
+    flight.classList.remove("arrived");
+    applyFlightRect(flight,target);
+  });
+
+  await new Promise(r=>setTimeout(r,510));
+  flight.remove();
+  activeMemoryOrigin.classList.remove("memory-origin-hidden");
+
+  video.removeAttribute("src");
+  video.load();
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden","true");
+  document.body.style.overflow="";
+  activeMemoryOrigin=null;
+  memoryAnimating=false;
+}
+
+document.addEventListener("keydown",(event)=>{
+  if(event.key==="Escape" && document.getElementById("memoryVideoModal")?.classList.contains("open")){
+    closeMemoryVideo();
+  }
+});
 
 function showMemories(){
   clickSound(); stopHum();
@@ -442,14 +957,269 @@ function showMemories(){
   document.getElementById("memories").classList.add("active");
   window.scrollTo({top:0,behavior:"smooth"});
 }
+let letterTypingToken = 0;
+
+function wait(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Keep the currently typed line visible when the letter grows beyond the viewport.
+// Scrolling only starts near the bottom edge so the page does not move unnecessarily.
+let lastLetterAutoScrollAt = 0;
+function keepLetterTypingVisible(target, force=false){
+  if(!target || !document.getElementById("letter")?.classList.contains("active")) return;
+
+  const now = performance.now();
+  if(!force && now - lastLetterAutoScrollAt < 90) return;
+
+  const rect = target.getBoundingClientRect();
+  const bottomSafeZone = window.innerHeight - 110;
+
+  if(rect.bottom > bottomSafeZone){
+    lastLetterAutoScrollAt = now;
+    const amount = rect.bottom - bottomSafeZone + 36;
+    window.scrollBy({
+      top: amount,
+      left: 0,
+      behavior: "smooth"
+    });
+  }
+}
+
+async function typeElement(element, speed, token){
+  const originalHTML = element.dataset.originalHtml || element.innerHTML;
+
+  if(!element.dataset.originalHtml){
+    element.dataset.originalHtml = originalHTML;
+  }
+
+  element.innerHTML = originalHTML;
+
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT
+  );
+
+  const nodes = [];
+  let node;
+
+  while(node = walker.nextNode()){
+    nodes.push({
+      node,
+      text: node.nodeValue
+    });
+  }
+
+  nodes.forEach(item => item.node.nodeValue = "");
+
+  element.classList.add("typing-active");
+
+  const cursor = document.createElement("span");
+  cursor.className = "typewriter-cursor";
+  element.appendChild(cursor);
+
+  let charCounter = 0;
+
+  for(const item of nodes){
+    for(const char of item.text){
+
+      if(token !== letterTypingToken){
+        cursor.remove();
+        return false;
+      }
+
+      item.node.nodeValue += char;
+      charCounter++;
+
+      // Check every few characters instead of every frame to keep scrolling smooth.
+      if(charCounter % 4 === 0){
+        keepLetterTypingVisible(cursor);
+      }
+
+      let delay = speed;
+
+      if(char === "." || char === "!" || char === "?"){
+        delay += 120;
+      }else if(char === "," || char === ";"){
+        delay += 55;
+      }
+
+      await wait(delay);
+    }
+  }
+
+  cursor.remove();
+  element.classList.remove("typing-active");
+  element.classList.add("typing-done");
+
+  return true;
+}
+
+async function startLetterTyping(){
+
+  const letter = document.querySelector(".system-letter");
+  if(!letter) return;
+
+  const token = ++letterTypingToken;
+
+  const items = [
+    letter.querySelector("h2"),
+    ...letter.querySelectorAll("p"),
+    letter.querySelector(".signature"),
+    letter.querySelector(".final")
+  ].filter(Boolean);
+
+  items.forEach(el => {
+    if(!el.dataset.originalHtml){
+      el.dataset.originalHtml = el.innerHTML;
+    }
+
+    el.innerHTML = el.dataset.originalHtml;
+    el.classList.remove("typing-active","typing-done");
+    el.classList.add("typewriter-item");
+  });
+
+  letter.classList.add("typing");
+
+  await wait(350);
+
+  for(const item of items){
+
+    if(token !== letterTypingToken) return;
+
+    const finished = await typeElement(
+      item,
+      40,
+      token
+    );
+
+    if(!finished) return;
+
+    // Make sure the end of each completed paragraph remains visible before continuing.
+    keepLetterTypingVisible(item, true);
+    await wait(250);
+  }
+
+  letter.classList.remove("typing");
+}
+
 function showLetter(){
   clickSound();
+
+  if(window.startLetterMusic){
+    window.startLetterMusic();
+  }
+
+  const letter = document.querySelector(".system-letter");
+
+  // Preserve the original content, then clear it BEFORE showing the letter screen
+  // so the complete letter never flashes on-screen before the typewriter starts.
+  if(letter){
+    const items = [
+      letter.querySelector("h2"),
+      ...letter.querySelectorAll("p"),
+      letter.querySelector(".signature"),
+      letter.querySelector(".final")
+    ].filter(Boolean);
+
+    items.forEach(el => {
+      if(!el.dataset.originalHtml){
+        el.dataset.originalHtml = el.innerHTML;
+      }
+
+      el.innerHTML = "";
+      el.classList.remove("typing-active","typing-done");
+      el.classList.add("typewriter-item");
+    });
+  }
+
   document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
   document.getElementById("letter").classList.add("active");
+  lastLetterAutoScrollAt = 0;
+  window.scrollTo({top:0,behavior:"smooth"});
+
+  setTimeout(()=>{
+    startLetterTyping();
+  },120);
+}
+
+function backToMemories(){
+  clickSound();
+  if(window.stopLetterMusic) window.stopLetterMusic();
+  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+  document.getElementById("memories").classList.add("active");
   window.scrollTo({top:0,behavior:"smooth"});
 }
 </script>
 
+
+<!-- LETTER BACKGROUND MUSIC: FINAL MESSAGE ONLY -->
+<audio id="letterBackgroundAudio"
+       src="sounds/letter-background.mp3"
+       preload="auto"
+       loop
+       playsinline></audio>
+
+<script id="letter-background-audio-script">
+(() => {
+  const music = document.getElementById('letterBackgroundAudio');
+  if (!music) return;
+
+  const TARGET_VOLUME = 0.20;
+  let fadeTimer = null;
+
+  function clearFade(){
+    if(fadeTimer){ clearInterval(fadeTimer); fadeTimer = null; }
+  }
+
+  function fadeVolume(target, duration=500, pauseAtEnd=false){
+    clearFade();
+    const start = Number.isFinite(music.volume) ? music.volume : 0;
+    const steps = 20;
+    let step = 0;
+    fadeTimer = setInterval(() => {
+      step++;
+      music.volume = Math.max(0, Math.min(1, start + (target-start)*(step/steps)));
+      if(step >= steps){
+        clearFade();
+        music.volume = target;
+        if(pauseAtEnd){
+          try{ music.pause(); music.currentTime = 0; }catch(e){}
+        }
+      }
+    }, Math.max(16, duration/steps));
+  }
+
+  window.startLetterMusic = async function(){
+    clearFade();
+    try{
+      music.currentTime = 0;
+      music.volume = 0;
+      await music.play();
+      fadeVolume(TARGET_VOLUME, 850, false);
+    }catch(e){
+      // showLetter() is triggered by a user click, so this should normally be allowed.
+    }
+  };
+
+  window.stopLetterMusic = function(){
+    if(music.paused){
+      try{ music.currentTime = 0; }catch(e){}
+      return;
+    }
+    fadeVolume(0, 320, true);
+  };
+
+  window.addEventListener('pagehide', () => {
+    clearFade();
+    try{ music.pause(); music.currentTime = 0; }catch(e){}
+  });
+  window.addEventListener('beforeunload', () => {
+    clearFade();
+    try{ music.pause(); }catch(e){}
+  });
+})();
+</script>
 
 <!-- REAL COMPUTER PROCESSING AUDIO: INTRO ONLY -->
 <audio id="computerProcessingAudio"
@@ -512,20 +1282,9 @@ function showLetter(){
     fadeTo(0, 550);
   }
 
-  // Try to start as soon as the page loads.
-  window.addEventListener('load', startIntroAudio);
-
-  // Browser autoplay fallback.
-  const unlock = () => {
-    if (!introAudioFinished) startIntroAudio();
-    window.removeEventListener('pointerdown', unlock);
-    window.removeEventListener('keydown', unlock);
-    window.removeEventListener('touchstart', unlock);
-  };
-
-  window.addEventListener('pointerdown', unlock, { once: true });
-  window.addEventListener('keydown', unlock, { once: true });
-  window.addEventListener('touchstart', unlock, { once: true });
+  // Audio is intentionally NOT started on page load. The pre-boot notification
+  // gate calls audio.play() directly from the visitor's click/keypress, then opens
+  // the boot screen. This avoids browser autoplay blocking without a second click.
 
   // Stop ONLY when the full intro has finished and the
   // [ ACCESS MEMORY ARCHIVE ] button is actually visible/ready.
@@ -584,5 +1343,56 @@ function showLetter(){
 })();
 </script>
 
+
+<script id="end-transmission-script">
+(() => {
+  let ending = false;
+
+  function shutdownTone(){
+    try{
+      initAudio();
+      if(!audioCtx) return;
+      const now=audioCtx.currentTime;
+      const o=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      o.type='sawtooth';
+      o.frequency.setValueAtTime(520,now);
+      o.frequency.exponentialRampToValueAtTime(58,now+.72);
+      g.gain.setValueAtTime(.025,now);
+      g.gain.exponentialRampToValueAtTime(.0001,now+.78);
+      o.connect(g);g.connect(audioCtx.destination);o.start(now);o.stop(now+.82);
+      tone(110,.12,'square',.015,.72);
+    }catch(e){}
+  }
+
+  window.endTransmission = function(){
+    if(ending) return;
+    ending=true;
+    const overlay=document.getElementById('shutdownOverlay');
+    if(!overlay) return;
+
+    // Stop final-letter music, archive video and the boot processing loop immediately.
+    if(window.stopLetterMusic) window.stopLetterMusic();
+    const video=document.getElementById('memoryModalVideo');
+    if(video){try{video.pause()}catch(e){}}
+    const bg=document.getElementById('computerProcessingAudio');
+    if(bg){try{bg.pause();bg.currentTime=0}catch(e){}}
+
+    shutdownTone();
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden','false');
+    document.documentElement.style.setProperty('overflow','hidden','important');
+    document.body.style.setProperty('overflow','hidden','important');
+
+    setTimeout(()=>overlay.classList.add('done'),1500);
+
+    // Browsers only allow window.close() when the page was opened by script.
+    // Try it; if the browser refuses, keep a clean powered-off black screen.
+    setTimeout(()=>{
+      try{window.open('','_self');window.close()}catch(e){}
+    },1750);
+  };
+})();
+</script>
 </body>
 </html>
