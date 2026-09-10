@@ -1410,33 +1410,7 @@ function backToMemories(){
     }catch(e){}
   }
 
-  window.endTransmission = function(){
-    if(ending) return;
-    ending=true;
-    const overlay=document.getElementById('shutdownOverlay');
-    if(!overlay) return;
 
-    // Stop final-letter music, archive video and the boot processing loop immediately.
-    if(window.stopLetterMusic) window.stopLetterMusic();
-    const player=document.getElementById('memoryModalPlayer');
-    if(player){try{player.src='about:blank'}catch(e){}}
-    const bg=document.getElementById('computerProcessingAudio');
-    if(bg){try{bg.pause();bg.currentTime=0}catch(e){}}
-
-    shutdownTone();
-    overlay.classList.add('active');
-    overlay.setAttribute('aria-hidden','false');
-    document.documentElement.style.setProperty('overflow','hidden','important');
-    document.body.style.setProperty('overflow','hidden','important');
-
-    setTimeout(()=>overlay.classList.add('done'),1500);
-
-    // Browsers only allow window.close() when the page was opened by script.
-    // Try it; if the browser refuses, keep a clean powered-off black screen.
-    setTimeout(()=>{
-      try{window.open('','_self');window.close()}catch(e){}
-    },1750);
-  };
 })();
 
 function endTransmission(){
