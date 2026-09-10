@@ -620,6 +620,170 @@ body::after {
 }
 </style>
 
+
+<style id="audio-preload-ui-style">
+/* ===== AUDIO PRELOAD / SECURE CACHE ===== */
+.audio-preload-panel{
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  margin:24px 0 16px;
+  text-align:left;
+  font-family:inherit;
+  color:#7d91a3;
+  user-select:none;
+  overflow:hidden;
+}
+.audio-preload-head{
+  display:flex;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:7px;
+  color:#8ddcff;
+  font-size:10px;
+  letter-spacing:.13em;
+  text-shadow:0 0 9px #8ddcff44;
+}
+#audioPreloadPercent{
+  min-width:42px;
+  text-align:right;
+  color:#b6ecff;
+}
+.audio-preload-track{
+  position:relative;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  height:7px;
+  overflow:hidden;
+  border:1px solid #315065;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #09131b 0,
+      #09131b 16px,
+      #0d1b25 16px,
+      #0d1b25 18px
+    );
+  box-shadow:
+    inset 0 0 12px #000,
+    0 0 12px #8ddcff16;
+}
+.audio-preload-track::before,
+.audio-preload-track::after{
+  content:"";
+  position:absolute;
+  top:-1px;
+  width:16px;
+  height:7px;
+  border-top:1px solid #8ddcff;
+  border-bottom:1px solid #8ddcff;
+  z-index:3;
+  opacity:.5;
+}
+.audio-preload-track::before{left:-1px;border-left:1px solid #8ddcff}
+.audio-preload-track::after{right:-1px;border-right:1px solid #8ddcff}
+.audio-preload-bar{
+  position:absolute;
+  inset:0 auto 0 0;
+  width:0%;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #62c9ef 0,
+      #62c9ef 12px,
+      #93e5ff 12px,
+      #93e5ff 15px
+    );
+  box-shadow:0 0 12px #75d8ff99;
+  transition:width .20s linear;
+}
+.audio-preload-bar::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,transparent,#fff8,transparent);
+  animation:audioBarPulse 1.05s linear infinite;
+}
+.audio-preload-scan{
+  position:absolute;
+  top:-5px;
+  bottom:-5px;
+  width:34px;
+  left:-40px;
+  background:linear-gradient(90deg,transparent,#8ddcff55,transparent);
+  filter:blur(2px);
+  animation:audioPreloadScan 1.35s linear infinite;
+  pointer-events:none;
+}
+.audio-preload-status{
+  margin-top:7px;
+  min-height:14px;
+  max-width:100%;
+  box-sizing:border-box;
+  overflow-wrap:anywhere;
+  color:#5f7485;
+  font-size:9px;
+  letter-spacing:.11em;
+}
+.loading-dots::after{
+  content:"";
+  animation:audioLoadingDots 1.2s steps(4,end) infinite;
+}
+.audio-preload-panel.ready .audio-preload-track{
+  border-color:#4f91a9;
+  box-shadow:
+    inset 0 0 12px #000,
+    0 0 15px #8ddcff25;
+}
+.audio-preload-panel.ready .audio-preload-status{
+  color:#78b5c9;
+}
+.audio-preload-panel.ready .audio-preload-scan{
+  animation:none;
+  opacity:0;
+}
+.gate-open-disabled{
+  opacity:.35 !important;
+  cursor:wait !important;
+  pointer-events:none;
+}
+#gate.audio-ready .gate-open{
+  opacity:1;
+  cursor:pointer;
+  pointer-events:auto;
+  text-shadow:0 0 10px #8ddcff55;
+}
+@keyframes audioPreloadScan{
+  0%{left:-42px;opacity:0}
+  12%{opacity:1}
+  88%{opacity:1}
+  100%{left:calc(100% + 12px);opacity:0}
+}
+@keyframes audioBarPulse{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(100%)}
+}
+@keyframes audioLoadingDots{
+  0%{content:""}
+  25%{content:"."}
+  50%{content:".."}
+  75%,100%{content:"..."}
+}
+@media (max-width:600px){
+  .audio-preload-panel{margin:20px 0 14px}
+  .audio-preload-head{gap:8px;font-size:9px;letter-spacing:.08em}
+  .audio-preload-status{font-size:8px;letter-spacing:.07em}
+}
+@media (prefers-reduced-motion:reduce){
+  .audio-preload-scan,.audio-preload-bar::after,.loading-dots::after{animation:none!important}
+}
+</style>
+
 </head>
 <body>
 
@@ -630,7 +794,22 @@ body::after {
     <div class="gate-icon" aria-hidden="true">!</div>
     <div class="gate-title">[ IMPORTANT NOTIFICATION ]</div>
     <div class="gate-text">A restricted memory package is waiting for authentication.</div>
-    <div class="gate-open">&gt; CLICK TO ACKNOWLEDGE</div>
+
+    <div id="audioPreloadPanel" class="audio-preload-panel" aria-live="polite">
+      <div class="audio-preload-head">
+        <span>&gt; PRELOADING AUDIO MODULES</span>
+        <span id="audioPreloadPercent">000%</span>
+      </div>
+      <div class="audio-preload-track" aria-hidden="true">
+        <div id="audioPreloadBar" class="audio-preload-bar"></div>
+        <div class="audio-preload-scan"></div>
+      </div>
+      <div id="audioPreloadStatus" class="audio-preload-status">
+        INITIALIZING AUDIO CACHE<span class="loading-dots"></span>
+      </div>
+    </div>
+
+    <div id="gateOpenText" class="gate-open gate-open-disabled">&gt; AUDIO CACHE NOT READY</div>
     <div class="gate-corner">AUTHORIZATION REQUIRED</div>
   </div>
 </section>
@@ -842,19 +1021,20 @@ function startBootSequence(){
 
 let gateEntered=false;
 function enterMemorySystem(){
-  if(gateEntered) return;
+  if(gateEntered || !window.audioPreloadReady) return;
   gateEntered=true;
 
-  // This function runs directly from the user's click/keypress. Starting both
-  // WebAudio and the MP3 here lets the same gesture satisfy browser autoplay rules.
+  // User gesture unlocks WebAudio and starts the already-preloaded intro MP3.
   initAudio();
   bootSound();
 
   const processingAudio=document.getElementById("computerProcessingAudio");
   if(processingAudio){
-    processingAudio.currentTime=0;
-    processingAudio.volume=.12;
-    processingAudio.play().catch(()=>{});
+    try{
+      processingAudio.currentTime=0;
+      processingAudio.volume=.12;
+      processingAudio.play().catch(()=>{});
+    }catch(e){}
   }
 
   const gate=document.getElementById("gate");
@@ -1238,12 +1418,24 @@ function backToMemories(){
   window.startLetterMusic = async function(){
     clearFade();
     try{
+      if(music.readyState < 3){
+        try{ music.load(); }catch(e){}
+      }
       music.currentTime = 0;
       music.volume = 0;
       await music.play();
       fadeVolume(TARGET_VOLUME, 850, false);
     }catch(e){
-      // showLetter() is triggered by a user click, so this should normally be allowed.
+      // showLetter() is triggered by a user click. If a browser still delays playback,
+      // the preload gate has already primed the media cache so a retry is usually immediate.
+      setTimeout(async ()=>{
+        try{
+          music.currentTime = 0;
+          music.volume = 0;
+          await music.play();
+          fadeVolume(TARGET_VOLUME, 850, false);
+        }catch(_){}
+      },180);
     }
   };
 
@@ -1505,5 +1697,142 @@ function endTransmission(){
   },1750);
 }
 </script>
+
+<script id="audio-preload-controller">
+(() => {
+  const gate = document.getElementById("gate");
+  const panel = document.getElementById("audioPreloadPanel");
+  const bar = document.getElementById("audioPreloadBar");
+  const percent = document.getElementById("audioPreloadPercent");
+  const status = document.getElementById("audioPreloadStatus");
+  const gateText = document.getElementById("gateOpenText");
+
+  const introAudio = document.getElementById("computerProcessingAudio");
+  const letterAudio = document.getElementById("letterBackgroundAudio");
+  const audios = [introAudio, letterAudio].filter(Boolean);
+
+  window.audioPreloadReady = false;
+
+  if(!audios.length){
+    window.audioPreloadReady = true;
+    gate?.classList.add("audio-ready");
+    panel?.classList.add("ready");
+    if(bar) bar.style.width = "100%";
+    if(percent) percent.textContent = "100%";
+    if(status) status.textContent = "AUDIO MODULES UNAVAILABLE / CONTINUING WITHOUT CACHE";
+    if(gateText){
+      gateText.textContent = "> CLICK TO ACKNOWLEDGE";
+      gateText.classList.remove("gate-open-disabled");
+    }
+    return;
+  }
+
+  const states = new Map(audios.map(a => [a, 0]));
+  let finished = false;
+
+  function estimate(a){
+    if(a.readyState >= 4) return 1;
+    if(a.readyState >= 3) return .92;
+    if(a.readyState >= 2) return .76;
+    if(a.readyState >= 1) return .42;
+
+    try{
+      if(Number.isFinite(a.duration) && a.duration > 0 && a.buffered?.length){
+        return Math.max(.08, Math.min(.9, a.buffered.end(a.buffered.length-1)/a.duration));
+      }
+    }catch(e){}
+    return .08;
+  }
+
+  function refresh(){
+    audios.forEach(a => states.set(a, Math.max(states.get(a) || 0, estimate(a))));
+    const value = audios.reduce((sum,a)=>sum+(states.get(a)||0),0)/audios.length;
+    const pct = Math.max(0, Math.min(100, Math.floor(value*100)));
+    if(bar) bar.style.width = pct + "%";
+    if(percent) percent.textContent = String(pct).padStart(3,"0") + "%";
+  }
+
+  function mark(a, value){
+    states.set(a, Math.max(states.get(a)||0, value));
+    refresh();
+  }
+
+  function finish(label="AUDIO CACHE READY / 2 MODULES VERIFIED"){
+    if(finished) return;
+    finished = true;
+    window.audioPreloadReady = true;
+
+    audios.forEach(a => states.set(a,1));
+    if(bar) bar.style.width = "100%";
+    if(percent) percent.textContent = "100%";
+    if(status) status.textContent = label;
+    panel?.classList.add("ready");
+    gate?.classList.add("audio-ready");
+
+    if(gateText){
+      gateText.textContent = "> CLICK TO ACKNOWLEDGE";
+      gateText.classList.remove("gate-open-disabled");
+    }
+
+    try{
+      initAudio();
+      tone(760,.04,"sine",.006);
+      tone(1040,.06,"sine",.005,.045);
+    }catch(e){}
+  }
+
+  function allReady(){
+    return audios.every(a => a.readyState >= 3);
+  }
+
+  audios.forEach((a,index)=>{
+    a.preload = "auto";
+
+    a.addEventListener("loadstart", ()=>mark(a,.10));
+    a.addEventListener("loadedmetadata", ()=>mark(a,.38));
+    a.addEventListener("loadeddata", ()=>mark(a,.68));
+    a.addEventListener("progress", ()=>{
+      try{
+        if(Number.isFinite(a.duration) && a.duration > 0 && a.buffered.length){
+          const ratio = a.buffered.end(a.buffered.length-1)/a.duration;
+          mark(a, Math.min(.92,.45 + ratio*.47));
+        }else{
+          refresh();
+        }
+      }catch(e){ refresh(); }
+    });
+    a.addEventListener("canplay", ()=>{
+      mark(a,.94);
+      if(allReady()) finish();
+    });
+    a.addEventListener("canplaythrough", ()=>{
+      mark(a,1);
+      if(allReady()) finish();
+    });
+    a.addEventListener("error", ()=>{
+      // A failed asset must not trap the viewer forever.
+      mark(a,1);
+      if([...states.values()].every(v=>v>=.94)) finish("AUDIO CACHE READY / DEGRADED LINK DETECTED");
+    });
+
+    try{ a.load(); }catch(e){}
+  });
+
+  refresh();
+
+  // Poll buffered state because some browsers emit sparse progress events.
+  const timer = setInterval(()=>{
+    if(finished){ clearInterval(timer); return; }
+    refresh();
+    if(allReady()) finish();
+  },180);
+
+  // Safety fallback: let the experience continue if a network/cache event stalls.
+  setTimeout(()=>{
+    if(!finished) finish("AUDIO CACHE READY / NETWORK FALLBACK");
+  },10000);
+})();
+</script>
+
 </body>
 </html>
