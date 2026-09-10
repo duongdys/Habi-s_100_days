@@ -1494,8 +1494,6 @@ function endTransmission(){
 
     overlay.classList.add("done");
 
-    // Browsers normally block window.close() on manually opened tabs.
-    // Try anyway; if blocked, the powered-off screen remains as the intended ending.
     setTimeout(()=>{
       try{
         window.open("", "_self");
