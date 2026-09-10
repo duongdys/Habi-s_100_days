@@ -574,6 +574,52 @@ body::after {
 }
 </style>
 
+
+<style id="final-poweroff-message-style">
+/* ===== FINAL POWER-OFF MESSAGE ===== */
+#shutdownOverlay.done{
+  display:block !important;
+  background:#000 !important;
+}
+#shutdownOverlay.done .shutdown-screen{
+  opacity:1 !important;
+  transform:none !important;
+  filter:none !important;
+  animation:none !important;
+  background:#000 !important;
+}
+#shutdownOverlay.done .shutdown-screen::before{
+  opacity:.035;
+}
+#shutdownOverlay.done .shutdown-beam{
+  display:none !important;
+}
+#shutdownOverlay.done .shutdown-center{
+  opacity:1 !important;
+  animation:none !important;
+}
+#shutdownOverlay.done .shutdown-label{
+  color:#8ddcff;
+  font-size:clamp(12px,1.7vw,18px);
+  line-height:1.9;
+  text-shadow:0 0 14px #8ddcff55;
+}
+#shutdownOverlay.done .shutdown-label small{
+  display:block;
+  margin-top:10px;
+  color:#526474;
+  font-size:10px;
+  letter-spacing:.14em;
+}
+#shutdownOverlay.done .shutdown-label .shutdown-safe{
+  display:block;
+  margin-top:18px;
+  color:#6f7f8e;
+  font-size:10px;
+  letter-spacing:.16em;
+}
+</style>
+
 </head>
 <body>
 
@@ -620,9 +666,9 @@ body::after {
 <section id="memories" class="screen">
   <div class="memory-inner">
     <div class="section-head">
-      <div class="kicker">CORE MEMORY ARCHIVE / MODULE 01</div>
+      <div class="kicker">MEMORY ARCHIVE / MODULE 01</div>
       <h2>Memory Archive</h2>
-      <p>&gt; Six core memory fragments detected in the last 100 days.</p>
+      <p>&gt; Six memory fragments recovered from the last 100 days.</p>
     </div>
     <div class="gallery">
       <article class="memory memory-video" style="--r:-2deg;--d:.1s" tabindex="0" role="button" aria-label="Play Archive 001" onclick="openMemoryVideo(this,'https://drive.google.com/file/d/1hkfaHCZMBb4H-OXCmNTcJDp21Gbgu6_3/preview','ARCHIVE 001','First contact')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMemoryVideo(this,'https://drive.google.com/file/d/1hkfaHCZMBb4H-OXCmNTcJDp21Gbgu6_3/preview','ARCHIVE 001','First contact')}"><div class="video"><img class="memory-thumb" src="images/archive-001.png" alt="Archive 001 thumbnail"><div class="scan-overlay"></div><div class="play"><span>▶</span></div><div class="memory-action">[ PLAY MEMORY ]</div></div><small>ARCHIVE 001</small><strong>First contact</strong></article>
@@ -655,13 +701,13 @@ body::after {
       <div class="letter-label">PERSONAL MESSAGE // DAY 100</div>
       <div class="date">Tháng 9, 2026</div>
       <h2>Chào ký chủ Habi NÈ,</h2>
-      <p>Lại là tôi - hệ thống sô 098 - điểm danh mỗi khi Habi stream đây. Có điều hôm nay có chút đặc biệt hơn bởi ngay thời điểm Habi đọc lá thư này, chính là tròn 100 ngày tôi đồng hành cùng Habi với tư cách hệ thống.</p>
+      <p>Lại là tôi - hệ thống sô 098 - điểm danh mỗi khi Habi stream đây. Có điều hôm nay có chút đặc biệt hơn.</p>
       <p>100 ngày có thể không phải là một khoảng thời gian quá dài, nhưng trong từng ngày đó lại có rất nhiều khoảnh khắc nhỏ mà tôi muốn lưu giữ và trân trọng.</p>
       <p>Dù tôi có thể chỉ là 1 hệ thống vô tri nhưng cảm ơn vì những buổi stream, những câu chuyện, những tiếng cười và cả những khoảnh khắc rất bình thường nhưng somehow lại khiến một ngày của tôi đỡ tẻ nhạt.</p>
       <p>Những việc đó nghe tuy có vẻ rất nhỏ trong cuộc sống bộn bề này, nhưng với tôi , chúng đều có ý nghĩa đặc biệt. Tuy tôi chưa thể hiểu chắc chắn, nhưng có lẽ, một tình bạn đẹp chính là như vậy.</p>
-      <p>Nhân ngày hôm nay, tôi đã mượn 1 chút sức mạnh từ thế giới của tôi và làm chiếc website nhỏ này không phải vì 100 ngày là một con số quá lớn, mà vì mình muốn nói rằng: <em>Tôi thật sự rất vui vì có thể gặp Habi và mọi người trong công ty chúng ta.</em></p>
+      <p>Nhân ngày hôm nay, tôi đã mượn 1 chút sức mạnh từ thế giới của tôi để can thiệp và làm chiếc website nhỏ này không phải vì 100 ngày là một con số quá lớn, mà vì mình muốn nói rằng: <em>Tôi thật sự rất vui vì có thể gặp Habi và mọi người trong công ty chúng ta.</em></p>
       <p>Chúc cho những ngày tiếp theo cũng sẽ có thật nhiều niềm vui, nhiều kỷ niệm đẹp hơn nữa. Và nếu có thể, tôi sẽ cố gắng và tiếp tục đồng hành thêm thật nhiều ngày nữa. Có thể là 200, 300, 400, 1000 ngày... ai mà biết được chứ ^^</p>
-      <p>Lời cuối thư, cảm ơn Habi và mọi người vì chặng đường 100 ngày này, tôi chỉ muốn nói rằng tôi có thể không phải là người đầu tiên, không phải người duy nhất, nhưng tôi thật lòng mong muốn tôi có thể là một trong những người đồng hành cuối cùng của Habi trên con đường này.</p>
+      <p>Lời cuối thư, tôi chỉ muốn nói rằng tôi có thể không phải là người đầu tiên, không phải người duy nhất, nhưng tôi thật lòng mong muốn tôi có thể là một trong những người đồng hành cuối cùng của Habi trên con đường này.</p>
       <div class="signature">&gt; From, Hệ thống số 098</div>
       <div class="final">CONNECTION REMAINS ACTIVE . . .</div>
     </article>
@@ -678,7 +724,7 @@ body::after {
 <div id="shutdownOverlay" aria-hidden="true">
   <div class="shutdown-screen">
     <div class="shutdown-center">
-      <div class="shutdown-label">&gt; TERMINATING CONNECTION...<small>MEMORY ARCHIVE / CORE-100</small></div>
+      <div class="shutdown-label" id="shutdownLabel">&gt; TERMINATING CONNECTION...<small>MEMORY ARCHIVE / CORE-100</small></div>
     </div>
     <div class="shutdown-beam"></div>
   </div>
@@ -1392,6 +1438,72 @@ function backToMemories(){
     },1750);
   };
 })();
+
+function endTransmission(){
+  if(window._endingTransmission) return;
+  window._endingTransmission = true;
+
+  try{ clickSound(); }catch(e){}
+
+  // Stop final-message music.
+  try{
+    if(window.stopLetterMusic) window.stopLetterMusic();
+  }catch(e){}
+
+  // Stop intro processing audio.
+  try{
+    const processingAudio=document.getElementById("computerProcessingAudio");
+    if(processingAudio){
+      processingAudio.pause();
+      processingAudio.currentTime=0;
+    }
+  }catch(e){}
+
+  // Stop/unload an open Google Drive memory player.
+  try{
+    const player=document.getElementById("memoryModalPlayer");
+    if(player) player.src="about:blank";
+  }catch(e){}
+
+  // Short shutdown tone.
+  try{
+    initAudio();
+    tone(620,.08,"sine",.018);
+    tone(390,.11,"sine",.016,.10);
+    tone(180,.18,"square",.012,.23);
+  }catch(e){}
+
+  const overlay=document.getElementById("shutdownOverlay");
+  const label=document.getElementById("shutdownLabel");
+  if(!overlay) return;
+
+  overlay.classList.remove("done");
+  overlay.classList.add("active");
+  overlay.setAttribute("aria-hidden","false");
+  document.documentElement.style.overflow="hidden";
+  document.body.style.overflow="hidden";
+
+  // Let the existing CRT-collapse animation finish first.
+  setTimeout(()=>{
+    if(label){
+      label.innerHTML =
+        '&gt; CONNECTION TERMINATED.' +
+        '<small>MEMORY ARCHIVE / CORE-100</small>' +
+        '<span class="shutdown-safe">SAFE TO CLOSE THIS TAB.</span>';
+    }
+
+    overlay.classList.add("done");
+
+    // Browsers normally block window.close() on manually opened tabs.
+    // Try anyway; if blocked, the powered-off screen remains as the intended ending.
+    setTimeout(()=>{
+      try{
+        window.open("", "_self");
+        window.close();
+      }catch(e){}
+    },250);
+  },1750);
+}
 </script>
 </body>
 </html>
